@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F3F4F6; /* Soft gray background */
+  --foreground: #1F2937; /* Gray-800 */
+  
+  --primary: #FDE047; /* Yellow-300 */
+  --primary-foreground: #000000;
+  
+  --secondary: #FFFFFF;
+  --secondary-foreground: #1F2937;
+  
+  --accent-blue: #93C5FD; /* Blue-300 */
+  --accent-green: #86EFAC; /* Green-300 */
+  --accent-orange: #FDBA74; /* Orange-300 */
+  
+  --card: #FFFFFF;
+  --card-foreground: #1F2937;
+  
+  --radius: 1.5rem; /* 24px */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-green: var(--accent-green);
+  --color-accent-orange: var(--accent-orange);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --radius-xl: var(--radius);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }

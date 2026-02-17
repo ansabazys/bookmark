@@ -1,8 +1,9 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { Trash2, ExternalLink } from 'lucide-react'
+import { Trash2, ExternalLink, Globe, Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Card, Badge } from './ui-components'
 
 type Bookmark = {
   id: string
@@ -44,7 +45,6 @@ export default function BookmarkList() {
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
-            console.log('Realtime payload:', payload)
             if (payload.eventType === 'INSERT') {
               setBookmarks((prev) => [payload.new as Bookmark, ...prev])
             } else if (payload.eventType === 'DELETE') {
@@ -54,9 +54,7 @@ export default function BookmarkList() {
             }
           }
         )
-        .subscribe((status) => {
-          console.log('Realtime subscription status:', status)
-        })
+        .subscribe()
     }
 
     setupRealtime()
@@ -75,29 +73,57 @@ export default function BookmarkList() {
   }
 
   if (bookmarks.length === 0) {
-      return <div className="text-center text-gray-500 py-10">No bookmarks yet. Add one!</div>
+      return (
+        <Card className="p-8 text-center border-dashed border-2 border-gray-300 bg-gray-50/50">
+            <div className="flex justify-center mb-4">
+                <Globe className="h-10 w-10 text-gray-300" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900">No bookmarks yet</h3>
+            <p className="text-gray-500 mt-1">Add your first bookmark to get started!</p>
+        </Card>
+      )
   }
 
   return (
-    <ul className="divide-y divide-gray-200">
+    <div className="grid gap-4 sm:grid-cols-2">
       {bookmarks.map((bookmark) => (
-        <li key={bookmark.id} className="py-4 flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
-                <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-indigo-600 truncate hover:underline flex items-center gap-1">
-                    {bookmark.title || bookmark.url}
-                    <ExternalLink className="h-3 w-3" />
-                </a>
-                <p className="text-xs text-gray-500 truncate">{bookmark.url}</p>
+        <Card key={bookmark.id} className="p-5 flex flex-col justify-between hover:border-black transition-all group bg-white">
+            <div className="flex items-start justify-between mb-4">
+                 <div className="p-2.5 bg-accent-blue/20 rounded-xl group-hover:bg-accent-blue/30 transition-colors">
+                    <Globe className="h-6 w-6 text-blue-700" />
+                 </div>
+                 <button
+                    onClick={() => handleDelete(bookmark.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    title="Delete"
+                 >
+                    <Trash2 className="h-4 w-4" />
+                 </button>
             </div>
-          <button
-            onClick={() => handleDelete(bookmark.id)}
-            className="text-gray-400 hover:text-red-500 transition-colors"
-            title="Delete"
-          >
-            <Trash2 className="h-5 w-5" />
-          </button>
-        </li>
+            
+            <div className="flex-1">
+                <h4 className="font-bold text-lg text-gray-900 line-clamp-2 leading-tight mb-1">
+                    {bookmark.title || "Untitled Bookmark"}
+                </h4>
+                <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-2">
+                    <Clock className="h-3 w-3" />
+                    <span>{new Date(bookmark.created_at).toLocaleDateString()}</span>
+                </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+              
+                <a 
+                    href={bookmark.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors"
+                >
+                    VISIT <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+            </div>
+        </Card>
       ))}
-    </ul>
+    </div>
   )
 }

@@ -1,45 +1,75 @@
-import { createClient } from '@/lib/supabase/server'
-import AddBookmark from '@/components/add-bookmark'
-import BookmarkList from '@/components/bookmark-list'
-import { LogOut } from 'lucide-react'
-import { redirect } from 'next/navigation'
+import { createClient } from "@/lib/supabase/server";
+import AddBookmarkDialog from "@/components/add-bookmark-dialog";
+import BookmarkList from "@/components/bookmark-list";
+import {
+  LogOut,
+  Home as HomeIcon,
+
+} from "lucide-react";
+import { redirect } from "next/navigation";
+
 
 export default async function Home() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
 
+  const userName = user.user_metadata?.full_name?.split(" ")[0] || "Friend";
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">My Bookmarks</h1>
-          <form action="/auth/signout" method="post">
-             <button type="submit" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
-                <LogOut className="h-4 w-4" />
-                Sign out
-             </button>
-          </form>
-        </div>
-      </header>
-      <main>
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="bg-white shadow sm:rounded-lg p-6 mb-6">
-                <AddBookmark />
+    <div className="flex justify-center bg-gray-50">
+      <div className="min-h-screen w-full max-w-6xl  pb-10 relative">
+        {/* Background Decor */}
+        <div className="fixed top-0 left-0 w-full h-125 bg-linear-to-b from-primary/10 to-transparent pointer-events-none z-0" />
+
+        {/* Header Section */}
+        <header className="px-6 py-8 relative z-10">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/60 backdrop-blur-sm rounded-full border border-white mb-4">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs font-bold text-gray-600">ONLINE</span>
+              </div>
+              <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+                Hello {userName}!
+              </h1>
+              <p className="text-gray-500 font-medium mt-1">
+                This is your personal success journey
+              </p>
             </div>
-            <div className="bg-white shadow sm:rounded-lg p-6">
-                <BookmarkList />
-            </div>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="p-2 bg-white rounded-xl  border border-neutral-200 hover:bg-gray-50 transition-colors text-gray-600"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </form>
           </div>
-        </div>
-      </main>
+        </header>
+
+        <main className="px-6 relative z-10 space-y-8">
+          {/* Add Section */}
+          <section className="flex items-center justify-between">
+            <h3 className="font-bold text-lg text-gray-900">Your Bookmarks</h3>
+            <AddBookmarkDialog />
+          </section>
+
+          {/* List Section */}
+          <section>
+             <div className="flex items-center justify-between mb-4">
+               {/* Separator moved or removed as per design preference, keeping clean for now */}
+             </div>
+            <BookmarkList />
+          </section>
+        </main>
+      </div>
     </div>
-  )
+  );
 }
