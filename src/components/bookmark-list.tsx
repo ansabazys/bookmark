@@ -1,9 +1,11 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { Trash2, ExternalLink, Globe, Clock } from 'lucide-react'
+import { Trash2, ExternalLink, Globe, Clock, Pencil } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Card, Badge } from './ui-components'
+import { Card } from './ui-components'
+import { Modal } from './ui-components'
+import EditBookmark from './edit-bookmark'
 
 type Bookmark = {
   id: string
@@ -14,6 +16,7 @@ type Bookmark = {
 
 export default function BookmarkList() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const [supabase] = useState(() => createClient())
 
   useEffect(() => {
@@ -65,6 +68,8 @@ export default function BookmarkList() {
   }, [supabase])
 
   const handleDelete = async (id: string) => {
+    if(!confirm("Are you sure you want to delete this bookmark?")) return;
+    
     const { error } = await supabase.from('bookmarks').delete().eq('id', id)
     if (error) {
       console.error('Error deleting bookmark:', error)
@@ -85,45 +90,66 @@ export default function BookmarkList() {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {bookmarks.map((bookmark) => (
-        <Card key={bookmark.id} className="p-5 flex flex-col justify-between hover:border-black transition-all group bg-white">
-            <div className="flex items-start justify-between mb-4">
-                 <div className="p-2.5 bg-accent-blue/20 rounded-xl group-hover:bg-accent-blue/30 transition-colors">
-                    <Globe className="h-6 w-6 text-blue-700" />
-                 </div>
-                 <button
-                    onClick={() => handleDelete(bookmark.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    title="Delete"
-                 >
-                    <Trash2 className="h-4 w-4" />
-                 </button>
-            </div>
-            
-            <div className="flex-1">
-                <h4 className="font-bold text-lg text-gray-900 line-clamp-2 leading-tight mb-1">
-                    {bookmark.title || "Untitled Bookmark"}
-                </h4>
-                <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-2">
-                    <Clock className="h-3 w-3" />
-                    <span>{new Date(bookmark.created_at).toLocaleDateString()}</span>
+    <>
+        <div className="grid gap-4 sm:grid-cols-2">
+        {bookmarks.map((bookmark) => (
+            <Card key={bookmark.id} className="p-5 flex flex-col justify-between hover:border-black transition-all group bg-white">
+                <div className="flex items-start justify-between mb-4">
+                    <div className="p-2.5 bg-accent-blue/20 rounded-xl group-hover:bg-accent-blue/30 transition-colors">
+                        <Globe className="h-6 w-6 text-blue-700" />
+                    </div>
+                    <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                         <button
+                            onClick={() => setEditingBookmark(bookmark)}
+                            className="p-1.5 text-gray-400 hover:text-indigo-500 rounded-lg transition-colors"
+                            title="Edit"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(bookmark.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                            title="Delete"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
-            </div>
+                
+                <div className="flex-1">
+                    <h4 className="font-bold text-lg text-gray-900 line-clamp-2 leading-tight mb-1">
+                        {bookmark.title || "Untitled Bookmark"}
+                    </h4>
+                    <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-2">
+                        <Clock className="h-3 w-3" />
+                        <span>{new Date(bookmark.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
 
-            <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-              
-                <a 
-                    href={bookmark.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors"
-                >
-                    VISIT <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-            </div>
-        </Card>
-      ))}
-    </div>
+                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                
+                    <a 
+                        href={bookmark.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors"
+                    >
+                        VISIT <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                </div>
+            </Card>
+        ))}
+        </div>
+
+        <Modal isOpen={!!editingBookmark} onClose={() => setEditingBookmark(null)}>
+            {editingBookmark && (
+                <EditBookmark 
+                    bookmark={editingBookmark} 
+                    onSuccess={() => setEditingBookmark(null)}
+                    onCancel={() => setEditingBookmark(null)}
+                />
+            )}
+        </Modal>
+    </>
   )
 }
